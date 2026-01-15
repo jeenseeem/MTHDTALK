@@ -73,3 +73,43 @@ body {
   90%  { opacity: 1;}
   100% { opacity: 0; left: -50vw;}
 }
+
+/* 오른쪽 히스토리 */
+#endword-list-panel {
+  position: fixed;
+  right: 10px;
+  top: 32px;
+  width: 190px;
+  max-height: 76vh;
+  background: rgba(30,35,48,0.95);
+  border-radius: 13px;
+  box-shadow: 0 6px 17px #0005;
+  z-index: 20;
+  padding: 12px 12px 8px 12px;
+  display: flex;
+  flex-direction: column;
+}
+#endword-list-title {
+  font-size: 1.04em;
+  font-weight: bold;
+  color: #0ecbff;
+  margin-bottom: 6px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+#endword-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  max-height: 62vh;
+  font-size: 1.09em;
+  color: #c9eeff;
+  line-height: 1.9;
+  word-break: break-word;
+}
+#endword-list span {
+  display: block;
+  margin-bottom: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  border-radius: 4px;
+}
