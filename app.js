@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, set, remove, onDisconnect, serverTimestamp, get, onChildRemoved, query, limitToLast } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, set, onDisconnect, serverTimestamp, get, onChildRemoved, query, limitToLast } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 // 랜덤 컬러 팔레트
 const colorSet = [
@@ -16,7 +16,7 @@ function getAnonNick() {
     [n, animal, colorIdx] = base.split(":");
     return {id:n, nick:"익명의 "+animal, color: colorSet[Number(colorIdx) % colorSet.length]};
   }
-    n = Math.floor(Math.random()*9999)+100;
+  n = Math.floor(Math.random()*9999)+100;
   animal = animals[Math.floor(Math.random()*animals.length)];
   colorIdx = Math.floor(Math.random()*colorSet.length);
   let uid = `${n}:${animal}:${colorIdx}`;
@@ -25,6 +25,7 @@ function getAnonNick() {
 }
 const myUser = getAnonNick();
 
+// Firebase 초기화
 const firebaseConfig = {
   apiKey: "AIzaSyCzCSi6eJh09lL_7i09flP2EgFva1ycByE",
   authDomain: "mthdchatting.firebaseapp.com",
@@ -37,7 +38,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// --- 유저 리스트
+// 사용자 리스트 표시
 const userListDiv = document.getElementById("user-list");
 function updateUserList(){
   get(ref(db, "/users")).then(snapshot=>{
@@ -53,25 +54,24 @@ function updateUserList(){
 onChildAdded(ref(db, 'users'), updateUserList);
 onChildRemoved(ref(db, 'users'), updateUserList);
 
-// 내 유저 입장 기록
+// 입장/퇴장 기록
 const myUserRef = ref(db, `users/${myUser.id}`);
 set(myUserRef, {nick: myUser.nick, color: myUser.color, at: serverTimestamp()});
 onDisconnect(myUserRef).remove();
 
-// --- 주요 DOM
+// 주요 DOM
 const input = document.getElementById('word-input');
 const container = document.getElementById('danmaku-container');
 const lastEndDiv = document.getElementById('last-endword');
 const modeChatBtn = document.getElementById('mode-chat');
 const modeEndWordBtn = document.getElementById('mode-endword');
-
 const endwordListDiv = document.getElementById('endword-list');
 let endwordsArr = [];
 
 let mode = 'chat';
 let lastEndWord = null;
 
-// 모드 전환
+// 모드 전환 버튼
 modeChatBtn.onclick = () => {
   mode = 'chat';
   modeChatBtn.classList.add('selected');
@@ -83,7 +83,7 @@ modeEndWordBtn.onclick = () => {
   modeChatBtn.classList.remove('selected');
 };
 
-// 끝말잇기 룰
+// 끝말잇기 룰 (한글 받침 둘째글자만 비교)
 function getLastChar(word) {
   let pure = word.replace(/[^가-힣]/g,"");
   if (pure.length === 0) return '';
@@ -94,7 +94,7 @@ function isValidWord(newWord, prevWord) {
   return getLastChar(prevWord) === newWord[0];
 }
 
-// 입력시
+// 입력
 input.addEventListener('keydown', function(e){
   if ((e.key === 'Enter' || e.keyCode === 13) && input.value.trim() !== '') {
     let text = input.value.trim().replace(/\s/g,'').slice(0,16);
@@ -103,11 +103,11 @@ input.addEventListener('keydown', function(e){
         text: text, mode: mode, time: Date.now(), user: myUser.nick, color: myUser.color
       });
     } else {
-      // 끝말잇기는 단어이력 저장용 DB에도 추가
+      // 끝말잇기는 오른쪽 패널용 DB에도 저장
       push(ref(db, 'danmaku_end'), {
         text: text, mode: mode, time: Date.now(), user: myUser.nick, color: myUser.color
       });
-      // 화면 효과용으로도 알림
+      // 효과 연동 위해 danmakus에도 같이 전송
       push(ref(db, 'danmakus'), {
         text: text, mode: mode, time: Date.now(), user: myUser.nick, color: myUser.color
       });
@@ -116,34 +116,33 @@ input.addEventListener('keydown', function(e){
   }
 });
 
-// -- 채팅 실시간 수신
+// 채팅 실시간 수신
 const msgRef = ref(db, 'danmakus');
 onChildAdded(
   query(msgRef, limitToLast(40)),
   (snapshot) => {
     const msg = snapshot.val();
     if (msg.mode === 'chat') {
-      spawnChatDanmaku(msg.text, msg.user, msg.color);
+      spawnChatDanmaku(msg.text, msg.color);
     } else if (msg.mode === 'endword') {
       spawnEndwordDanmaku(msg.text, msg.user, msg.color);
     }
   }
 );
 
-// -- 끝말잇기 단어 히스토리 (오른쪽 패널)
+// 끝말잇기 단어 히스토리 패널(오른쪽)
 const endRef = ref(db, 'danmaku_end');
 onChildAdded(
   query(endRef, limitToLast(200)),
   (snapshot) => {
     const msg = snapshot.val();
     if (msg.mode === 'endword') {
-      addEndwordToPanel(msg.text, msg.user, msg.color);
+      addEndwordToPanel(msg.text);
     }
   }
 );
 
-// 패널 단어 추가 함수
-function addEndwordToPanel(word, user, color) {
+function addEndwordToPanel(word) {
   endwordsArr.push(word);
   if (endwordsArr.length > 200) endwordsArr.shift();
   endwordListDiv.innerHTML = endwordsArr
@@ -152,17 +151,22 @@ function addEndwordToPanel(word, user, color) {
   endwordListDiv.scrollTop = endwordListDiv.scrollHeight;
 }
 
-// ---- 효과
-function spawnChatDanmaku(text, user, color) {
+// ---- 효과(채팅/끝말잇기)
+function spawnChatDanmaku(text, color) {
   const span = document.createElement('span');
-  span.innerHTML = `<span style="color:${color};font-weight:bold">${user}</span> ${text}`;
+  // 글자크기 랜덤
+  const fontSize = (1.0 + Math.random() * 1.3).toFixed(2) + "em";
+  span.textContent = text;
+  span.style.fontSize = fontSize;
+  span.style.color = color;
   span.className = 'danmaku chat';
   span.style.top = (10 + Math.random() * 78) + 'vh';
-  const animDuration = (5.5 + Math.random() * 3.5).toFixed(2);
+  const animDuration = (10 + Math.random() * 3).toFixed(2); // 10~13초, 매우 느리게
   span.style.animationDuration = animDuration + 's';
   container.appendChild(span);
   setTimeout(() => { span.remove(); }, (parseFloat(animDuration) * 1000) + 500);
 }
+
 function spawnEndwordDanmaku(text, user, color) {
   const span = document.createElement('span');
   span.textContent = text;
