@@ -78,9 +78,9 @@ body {
   position: fixed;
   right: 10px;
   top: 32px;
-  width: 190px;
-  max-height: 76vh;
-  background: rgba(30,35,48,0.95);
+  width: 200px;
+  max-height: 80vh;
+  background: rgba(30,35,48,0.97);
   border-radius: 13px;
   box-shadow: 0 6px 17px #0005;
   z-index: 20;
@@ -99,7 +99,7 @@ body {
 #endword-list {
   flex: 1 1 auto;
   overflow-y: auto;
-  max-height: 62vh;
+  max-height: 64vh;
   font-size: 1.09em;
   color: #c9eeff;
   line-height: 1.9;
