@@ -1,18 +1,49 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, set, onDisconnect, serverTimestamp, get, onChildRemoved, remove, query, limitToLast } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, set, onDisconnect, serverTimestamp, get, onChildRemoved, remove, query, limitToLast, onChildChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-// ---------- 익명 닉네임 + 랜덤색 ---------
-const colorSet = ["#e57373","#64b5f6","#81c784","#ffb74d","#ba68c8","#4db6ac","#ffd54f","#a1887f","#90a4ae","#f06292"];
-function getAnonNick() {
-  const animals = ["낙타","거북이","호랑이","고양이","펭귄","돌고래","고라니","침팬지","병아리","닭","하마","수달","부엉이","판다","돼지","코뿔소","양","두더지","늑대","쥐","개구리"];
-  let n = Math.floor(Math.random()*9999)+100;
-  let animal = animals[Math.floor(Math.random()*animals.length)];
-  let colorIdx = Math.floor(Math.random()*colorSet.length);
-  return {id: n, nick: "익명의 "+animal, color:colorSet[colorIdx]};
+// 1. 무작위(겹치지 않는) 동물명 & 색상
+const animals = [
+  "코끼리","여우","호랑이","침팬지","고릴라","코알라","나무늘보","수달","카피바라","레서판다",
+  "토끼","고양이","사자","재규어","치타","들개","늑대","여우","스라소니","하이에나","하마",
+  "물개","바다표범","펭귄","도롱뇽","악어","카멜레온","청설모","햄스터","족제비","담비","미어캣",
+  "알파카","라마","염소","양","소","황소","말","얼룩말","당나귀","들소","영양","오카피","기린",
+  "버팔로","딱따구리","독수리","까치","올빼미","부엉이","앵무새","공작","닭","오리","거위",
+  "백조","타조","매","수리","갈매기","개구리","두꺼비","맹꽁이","도마뱀","이구아나","고래",
+  "상어","연어","참치","흰동가리","해마","복어","문어","오징어","가재","게","가오리","가마우지",
+  "돌고래","불가사리","산호","조개","나비","벌","잠자리","파리","호랑나비","반딧불이","풍뎅이",
+  "거북이","두더지","쥐","고라니","두루미","공작새","표범","다람쥐","스컹크","가젤"
+];
+
+const colorSet = [
+  "#d45b7a","#3999d7","#9eae3b","#f5ac36","#b670d3","#4ed7b1","#ffe159","#a69383","#6ea6b4",
+  "#db7b1d","#6ac8e5","#f770a2","#756fb5","#74be38","#53d076","#e78b4c","#60ae65","#f66e5b",
+  "#9050b7","#ceb739","#e34234","#54a4ba","#e398d5","#70b2a4","#c4a15a"
+];
+// 동물, 색 고유배정 (겹치지 않게)
+function getAvailableAnimalColor(allUsers) {
+  // 현재 사용중인 조합 추출
+  const used = new Set();
+  allUsers.forEach(u=>{
+    used.add(`${u.animal}:${u.color}`);
+  });
+  let tries = 0;
+  while (tries++ < 500) {
+    const animal = animals[Math.floor(Math.random()*animals.length)];
+    const color  = colorSet[Math.floor(Math.random()*colorSet.length)];
+    if (!used.has(`${animal}:${color}`)) {
+      return { animal, color };
+    }
+  }
+  // 만약 실패하면 랜덤
+  return {
+    animal: animals[Math.floor(Math.random()*animals.length)],
+    color: colorSet[Math.floor(Math.random()*colorSet.length)]
+  }
 }
-const myUser = getAnonNick();
+// 랜덤 번호
+function randomNumber() { return Math.floor(Math.random()*9999)+100; }
 
-// ---------- 파이어베이스 연결 -----------
+// 2. 파이어베이스 연결/닉네임 중복 방지 배정
 const firebaseConfig = {
   apiKey: "AIzaSyCzCSi6eJh09lL_7i09flP2EgFva1ycByE",
   authDomain: "mthdchatting.firebaseapp.com",
@@ -25,7 +56,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-// ---------- DOM -----------
+// 3. 익명유저 동물/색 중복 방지, 배정 (계속)
+  usersSnap.forEach(child=>{
+    let v = child.val();
+    allUsers.push({animal: (v.animal || ""), color: (v.color || "")});
+  });
+  const choice = getAvailableAnimalColor(allUsers);
+  myUser = {
+    id: randomNumber(),
+    nick: `익명의 ${choice.animal}`,
+    animal: choice.animal,
+    color: choice.color
+  };
+  // 사용자 기록
+  const myUserRef = ref(db, `users/${myUser.id}`);
+  set(myUserRef, {nick: myUser.nick, animal: myUser.animal, color: myUser.color, at: serverTimestamp()});
+  onDisconnect(myUserRef).remove();
+}
+await assignUser();
+
+// ---- DOM 변수 및 기타 상태 ----
 const userListDiv      = document.getElementById("user-list");
 const input            = document.getElementById('word-input');
 const container        = document.getElementById('danmaku-container');
@@ -35,8 +85,20 @@ const modeEndWordBtn   = document.getElementById('mode-endword');
 const endwordListDiv   = document.getElementById('endword-list');
 const resetBtn         = document.getElementById('reset-endword-btn');
 const resetStatus      = document.getElementById('reset-status');
+// 팝업투표
+const voteModal        = document.getElementById('reset-vote-modal');
+const voteYesBtn       = document.getElementById('vote-yes');
+const voteNoBtn        = document.getElementById('vote-no');
+const voteProgress     = document.getElementById('reset-vote-progress');
 
-// ---------- 유저리스트(실시간/색상고정) ----------
+let mode         = 'chat';
+let lastEndWord  = "";
+let endwordsArr  = [];
+let voteStatus   = {}; // {uid: 'yes'|'no'}
+let hasVoted     = false;
+let modalOpen    = false;
+
+// ---- 유저리스트(실시간/색상고정/동물 명시) ----
 function updateUserList(){
   get(ref(db, "/users")).then(snapshot=>{
     let html = `<span style="color:#fff;font-weight:bold;">입장인원</span><br>`;
@@ -51,66 +113,7 @@ function updateUserList(){
 onChildAdded(ref(db, 'users'), updateUserList);
 onChildRemoved(ref(db, 'users'), updateUserList);
 
-// ---------- 사용자 입장/퇴장 기록 ----------
-const myUserRef = ref(db, `users/${myUser.id}`);
-set(myUserRef, {nick: myUser.nick, color: myUser.color, at: serverTimestamp()});
-onDisconnect(myUserRef).remove();
-
-// ---------- 투표 기반 히스토리 초기화 ----------
-let resetVoted = false, resetVotes = {}, resetVoting = false;
-const resetVotesRef = ref(db, 'danmaku_reset_votes');
-onChildAdded(resetVotesRef, countResetVotes);
-onChildRemoved(resetVotesRef, countResetVotes);
-
-function countResetVotes() {
-  get(resetVotesRef).then(snapshot=>{
-    const votes = {};
-    snapshot.forEach(child => { votes[child.key] = true; });
-    resetVotes = votes;
-    const numVotes = Object.keys(votes).length || 0;
-    const userCount = Math.max(1, document.querySelectorAll('#user-list span').length - 1);
-    resetStatus.textContent =
-      resetVoting
-      ? `초기화 투표 ${numVotes}/${userCount}명 (${Math.ceil(userCount/2)}명 이상)`
-      : '';
-    if(userCount>0 && numVotes >= Math.ceil(userCount/2)) resetEndwordHistory();
-  });
-}
-
-resetBtn.onclick = ()=>{
-  if (resetVoted) {
-    alert("이미 투표하셨습니다!");
-    return;
-  }
-  resetVoting = true;
-  set(ref(db, `danmaku_reset_votes/${myUser.id}`), true);
-  resetBtn.disabled = true;
-  resetBtn.textContent = "투표 중...";
-  setTimeout(()=>{
-    resetBtn.disabled = false;
-    resetBtn.textContent = "끝말잇기 초기화 요청";
-  }, 5000);
-  resetVoted = true;
-};
-
-function resetEndwordHistory() {
-  remove(ref(db, 'danmaku_end')).then(()=>{
-    endwordsArr = [];
-    endwordListDiv.innerHTML = "";
-    if (lastEndDiv) lastEndDiv.textContent = "";
-    resetVoting = false;
-    resetVoted = false;
-    resetStatus.textContent = "초기화됨!";
-    remove(resetVotesRef);
-    setTimeout(()=>{ resetStatus.textContent = ""; }, 2000);
-  });
-}
-
-// ---------- 모드 상태 ----------
-let mode = 'chat';
-let lastEndWord = null;
-let endwordsArr = [];
-
+// ---- 모드 전환 ----
 modeChatBtn.onclick = () => {
   mode = 'chat';
   modeChatBtn.classList.add('selected');
@@ -122,6 +125,73 @@ modeEndWordBtn.onclick = () => {
   modeChatBtn.classList.remove('selected');
 };
 
+// ---- 팝업 투표 관련 ----
+function openVoteModal() {
+  voteModal.style.display = 'block';
+  voteProgress.innerText = "";
+  hasVoted = false;
+  modalOpen = true;
+}
+function closeVoteModal() {
+  voteModal.style.display = 'none';
+  modalOpen = false;
+}
+// 투표 상태 집계
+function updateVoteProgress() {
+  get(ref(db, "reset_votes")).then(snapshot => {
+    let yes=0, no=0, total=0;
+    let userCount = Math.max(1, document.querySelectorAll('#user-list span').length - 1);
+    snapshot.forEach(child=>{
+      total++;
+      if(child.val()==="yes") yes++;
+      if(child.val()==="no")  no++;
+    });
+    voteProgress.innerText = `찬성:${yes} / 반대:${no} (전체:${userCount}, 과반=${Math.ceil(userCount/2)})`;
+    if(userCount>0 && yes>=Math.ceil(userCount/2)) {
+      remove(ref(db, 'danmaku_end')).then(()=>{
+        endwordsArr = [];
+        endwordListDiv.innerHTML = "";
+        if (lastEndDiv) lastEndDiv.textContent = "";
+        lastEndWord = ""; // 함께 초기화
+        voteProgress.innerText = "초기화 완료!";
+        setTimeout(()=>{
+          closeVoteModal();
+          remove(ref(db, "reset_votes"));
+        }, 1800);
+      });
+    }
+    if(userCount>0 && no>=Math.ceil(userCount/2)) {
+      voteProgress.innerText = "초기화가 반대로 부결되었습니다.";
+      setTimeout(()=>{
+        closeVoteModal();
+        remove(ref(db, "reset_votes"));
+      }, 1800);
+    }
+  });
+}
+const voteRef = ref(db, "reset_votes");
+onChildAdded(voteRef, updateVoteProgress);
+onChildRemoved(voteRef, updateVoteProgress);
+onChildChanged && onChildChanged(voteRef, updateVoteProgress);
+
+voteYesBtn.onclick = () => {
+  if (hasVoted) return;
+  set(ref(db, `reset_votes/${myUser.id}`), "yes");
+  hasVoted = true;
+  voteProgress.innerText = "찬성 투표 완료! 대기 중...";
+};
+voteNoBtn.onclick = () => {
+  if (hasVoted) return;
+  set(ref(db, `reset_votes/${myUser.id}`), "no");
+  hasVoted = true;
+  voteProgress.innerText = "반대 투표 완료! 대기 중...";
+};
+
+resetBtn.onclick = () => {
+  if(!modalOpen) openVoteModal();
+};
+
+// ---- 끝말잇기 룰 ----
 function getLastChar(word) {
   let pure = word.replace(/[^가-힣]/g,"");
   if (pure.length === 0) return '';
@@ -132,27 +202,30 @@ function isValidWord(newWord, prevWord) {
   return getLastChar(prevWord) === newWord[0];
 }
 
-// ---------- 엔터 입력 송신 (글자수 제한X) ----------
+// ---- 입력 (글자수제한X) ----
 input.addEventListener('keydown', function(e){
   if ((e.key === 'Enter' || e.keyCode === 13) && input.value.trim() !== '') {
-    let text = input.value;  // 글자길이 제한 없음
+    let text = input.value;
     if(mode === "chat"){
       push(ref(db, 'danmakus'), {
-        text: text, mode: mode, time: Date.now(), user: myUser.nick, color: myUser.color
+        text: text, mode: mode, time: Date.now(),
+        user: myUser.nick, color: myUser.color
       });
     } else {
       push(ref(db, 'danmaku_end'), {
-        text: text, mode: mode, time: Date.now(), user: myUser.nick, color: myUser.color
+        text: text, mode: mode, time: Date.now(),
+        user: myUser.nick, color: myUser.color
       });
       push(ref(db, 'danmakus'), {
-        text: text, mode: mode, time: Date.now(), user: myUser.nick, color: myUser.color
+        text: text, mode: mode, time: Date.now(),
+        user: myUser.nick, color: myUser.color
       });
     }
     input.value = '';
   }
 });
 
-// ---------- 실시간 채팅 출력 ----------
+// ---- 채팅 Danmaku ----
 const msgRef = ref(db, 'danmakus');
 onChildAdded(
   query(msgRef, limitToLast(40)),
@@ -174,13 +247,13 @@ function spawnChatDanmaku(text, color) {
   span.style.color = color;
   span.className = 'danmaku chat';
   span.style.top = (10 + Math.random() * 78) + 'vh';
-  const animDuration = (10 + Math.random() * 3).toFixed(2); // 10~13초
+  const animDuration = (10 + Math.random() * 3).toFixed(2);
   span.style.animationDuration = animDuration + 's';
   container.appendChild(span);
   setTimeout(() => { span.remove(); }, (parseFloat(animDuration) * 1000) + 500);
 }
 
-// ---------- 실시간 끝말잇기 Danmaku + 마지막 단어 ----------
+// ---- 끝말잇기 Danmaku + 마지막 단어 ----
 function spawnEndwordDanmaku(text, user, color) {
   const span = document.createElement('span');
   span.textContent = text;
@@ -200,7 +273,7 @@ function spawnEndwordDanmaku(text, user, color) {
   }
 }
 
-// ---------- 끝말잇기 단어 히스토리 오른쪽 패널 ----------
+// ---- 끝말잇기 단어 히스토리 오른쪽 패널 ----
 const endRef = ref(db, 'danmaku_end');
 onChildAdded(
   query(endRef, limitToLast(200)),
