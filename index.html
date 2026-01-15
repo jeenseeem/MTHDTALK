@@ -7,7 +7,7 @@
 </head>
 <body>
   <div style="display:flex;align-items: flex-start;">
-    <div id="user-list" style="min-width:130px;max-width:180px;margin-top:30px;font-size:1em;line-height:1.45"></div>
+    <div id="user-list" style="min-width:130px;max-width:200px;margin-top:30px;font-size:1em;line-height:1.45"></div>
     <div style="flex:1;">
       <div id="last-endword" style="text-align:center; font-size:2em; color:#1fa4ff; margin-top:22px; margin-bottom:12px;"></div>
       <div id="mode-selector">
@@ -24,6 +24,19 @@
       <div id="endword-list"></div>
     </div>
   </div>
+
+  <!-- 중앙 투표 팝업 레이어 -->
+  <div id="reset-vote-modal" style="display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:1000;background:rgba(0,0,0,0.28);">
+    <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#222a;padding:32px 32px 26px 32px;border-radius:18px;box-shadow:0 8px 40px #000b;min-width:260px;text-align:center;">
+      <div id="reset-vote-question" style="font-size:1.18em;color:#ffc;">끝말잇기 히스토리를 초기화하시겠습니까?</div>
+      <div style="margin-top:20px;">
+        <button id="vote-yes" style="margin:0 16px;padding:9px 32px;font-size:1.1em;border-radius:7px;background:#32bdea;border:none;color:#fff;cursor:pointer;">찬성</button>
+        <button id="vote-no" style="margin:0 16px;padding:9px 32px;font-size:1.1em;border-radius:7px;background:#e5595a;border:none;color:#fff;cursor:pointer;">반대</button>
+      </div>
+      <div id="reset-vote-progress" style="margin-top:15px;font-size:0.97em;color:#f8e8ff"></div>
+    </div>
+  </div>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>
