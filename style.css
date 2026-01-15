@@ -12,7 +12,6 @@ body {
   cursor: pointer; transition: background 0.2s;
 }
 #mode-selector button.selected { background: #3d8cff; color: #fff; font-weight:bold; }
-
 #danmaku-container {
   position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
   pointer-events: none; z-index: 2;
@@ -28,12 +27,11 @@ body {
   border: none; z-index: 10;
   box-shadow: 0 8px 24px #0007;
 }
-
 .danmaku.chat {
   position: absolute; white-space: nowrap; font-size: 2.0em;
-  color: #fff; font-weight: bold;
+  font-weight: bold;
   text-shadow: 0 2px 8px #fff6, 0 0 12px #bbf2;
-  filter: blur(1.2px) brightness(1.13);
+  filter: blur(0.15px) brightness(1.09);
   animation-name: danmaku-move;
   animation-timing-function: cubic-bezier(.34,1,.52,1);
   animation-fill-mode: forwards;
@@ -44,30 +42,30 @@ body {
   position: absolute; left: 50%;
   font-size: 2.15em; font-weight: bold;
   color: #1fa4ff;
-  text-shadow: 0 0 14px #53d4ff, 0 2px 13px #0cc2ffb6;
-  filter: blur(0.7px) brightness(1.10);
+  text-shadow: 0 0 8px #53d4ff, 0 2px 7px #0cc2ffb6;
+  filter: blur(0.2px) brightness(1.05);
   animation: danmaku-up 3.2s cubic-bezier(.4,0,.9,1) forwards;
   pointer-events: none;
   transform: translateX(-50%);
 }
 .danmaku.endword.invalid {
   color: #ff2222;
-  text-shadow: 0 2px 18px #ff9a, 0 0 22px #fa5;
-  filter: blur(1.5px) brightness(1.33);
+  text-shadow: 0 2px 7px #ff9a, 0 0 8px #fa5;
+  filter: blur(1px) brightness(1.08);
   animation: danmaku-explode 1.3s cubic-bezier(.6,-0.5,.75,2.2) forwards;
 }
 @keyframes danmaku-up {
-  0%   { opacity:0; transform: translate(-50%, 0px) scale(0.95);}
-  10%  { opacity:1; filter: blur(0.7px);}
-  60%  { opacity:0.97; filter: blur(0.3px);}
-  82%  { filter: blur(2px);}
-  100% { opacity:0; transform: translate(-50%, -230px) scale(1.2); filter: blur(3px);}
+  0%   { opacity:0; filter: blur(0.2px); }
+  10%  { opacity:1; filter: blur(0.3px);}
+  60%  { opacity:0.97; filter: blur(0.15px);}
+  82%  { filter: blur(0.7px);}
+  100% { opacity:0; transform: translate(-50%, -230px) scale(1.1); filter: blur(1.1px);}
 }
 @keyframes danmaku-explode {
   0%   { opacity:1; transform: translate(-50%, 0) scale(1);}
-  30%  { filter: blur(2.4px) brightness(1.2);}
-  70%  { filter: blur(8px) brightness(2);}
-  100% { opacity:0; transform: translate(-50%, -88px) scale(1.7); filter: blur(16px);}
+  30%  { filter: blur(1.3px);}
+  70%  { filter: blur(5px);}
+  100% { opacity:0; transform: translate(-50%, -88px) scale(1.5); filter: blur(12px);}
 }
 @keyframes danmaku-move {
   0%   { opacity: 0; left: 100vw;}
