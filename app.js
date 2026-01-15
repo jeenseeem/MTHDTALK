@@ -1,12 +1,10 @@
-// Firebase 설정(자신의 것으로 교체)
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// 기존 import문 제거!
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+// <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+// 이 방식으로 불러오면 window.firebase로 객체를 바로 사용
+
+// 그대로 사용:
 const firebaseConfig = {
   apiKey: "AIzaSyCzCSi6eJh09lL_7i09flP2EgFva1ycByE",
   authDomain: "mthdchatting.firebaseapp.com",
@@ -18,9 +16,10 @@ const firebaseConfig = {
   measurementId: "G-WF986QWD6P"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+firebase.initializeApp(firebaseConfig);
+
+// 실시간 데이터베이스 사용
+const db = firebase.database();
 
 const input = document.getElementById('word-input');
 const container = document.getElementById('danmaku-container');
