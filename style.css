@@ -64,6 +64,7 @@ body {
   82%  { filter: blur(6.7px);}
   100% { opacity:0; transform: translate(-50%, -230px) scale(1.25); filter: blur(14px);}
 }
+
 /* 터지는 효과 */
 @keyframes danmaku-explode {
   0%   { opacity:1; transform: translate(-50%, 0) scale(1);}
@@ -71,6 +72,7 @@ body {
   70%  { filter: blur(14px) brightness(4);}
   100% { opacity:0; transform: translate(-50%, -88px) scale(2.1); filter: blur(32px);}
 }
+
 /* 가로 Danmaku */
 @keyframes danmaku-move {
   0%   { opacity: 0; left: 100vw;}
