@@ -33,7 +33,9 @@ body {
   color: #fff; font-weight: bold;
   text-shadow: 0 2px 8px #fff6, 0 0 12px #bbf2;
   filter: blur(1.2px) brightness(1.13);
-  animation: danmaku-move 3.3s cubic-bezier(.34,1,.52,1) forwards;
+  animation-name: danmaku-move;
+  animation-timing-function: cubic-bezier(.34,1,.52,1);
+  animation-fill-mode: forwards;
   pointer-events: none;
   top: 0; left: 0;
 }
