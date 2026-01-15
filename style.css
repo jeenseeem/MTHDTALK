@@ -1,63 +1,37 @@
 body {
   background: #181018;
-  margin: 0;
-  overflow: hidden;
-  height: 100vh;
+  margin: 0; overflow: hidden; height: 100vh;
 }
-
 #mode-selector {
-  position: fixed;
-  left: 50%;
-  top: 18px;
-  transform: translateX(-50%);
-  z-index: 11;
+  position: relative; left: 0; top: 12px; text-align: center;
+  z-index: 11; margin-bottom:18px;
 }
 #mode-selector button {
-  background: #222b;
-  color: #fff;
-  border: none;
-  margin: 0 2px;
-  font-size: 1.11em;
-  padding: 8px 17px;
-  border-radius: 15px;
-  cursor: pointer;
-  transition: background 0.2s;
+  background: #222b; color: #fff; border: none; margin: 0 2px;
+  font-size: 1.11em; padding: 8px 17px; border-radius: 15px;
+  cursor: pointer; transition: background 0.2s;
 }
-#mode-selector button.selected {
-  background: #3d8cff;
-  color: #fff;
-  font-weight: bold;
-}
+#mode-selector button.selected { background: #3d8cff; color: #fff; font-weight:bold; }
+
 #danmaku-container {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: 2;
+  position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
+  pointer-events: none; z-index: 2;
+}
+#user-list {
+  position:fixed; left:10px; top:24px; font-size:1.05em;
+  padding:8px 6px 8px 0;
 }
 #word-input {
-  position: fixed;
-  left: 50%;
-  bottom: 32px;
-  transform: translateX(-50%);
-  padding: 16px;
-  font-size: 1.35em;
-  border-radius: 12px;
-  width: 330px;
-  background: rgba(30,30,40,0.92);
-  color: #fff;
-  border: none;
-  z-index: 10;
+  position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%);
+  padding: 16px; font-size: 1.35em; border-radius: 12px; width: 330px;
+  background: rgba(30,30,40,0.92); color: #fff;
+  border: none; z-index: 10;
   box-shadow: 0 8px 24px #0007;
 }
+
 .danmaku.chat {
-  position: absolute;
-  white-space: nowrap;
-  font-size: 2.0em;
-  color: #fff;
-  font-weight: bold;
+  position: absolute; white-space: nowrap; font-size: 2.0em;
+  color: #fff; font-weight: bold;
   text-shadow: 0 2px 8px #fff6, 0 0 12px #bbf2;
   filter: blur(1.2px) brightness(1.13);
   animation-name: danmaku-move;
@@ -67,13 +41,11 @@ body {
   top: 0; left: 0;
 }
 .danmaku.endword {
-  position: absolute;
-  left: 50%;
-  font-size: 2.15em;
-  font-weight: bold;
+  position: absolute; left: 50%;
+  font-size: 2.15em; font-weight: bold;
   color: #1fa4ff;
-  text-shadow: 0 0 16px #53d4ff, 0 2px 17px #0cc2ffb6;
-  filter: blur(1.8px) brightness(1.18);
+  text-shadow: 0 0 14px #53d4ff, 0 2px 13px #0cc2ffb6;
+  filter: blur(0.7px) brightness(1.10);
   animation: danmaku-up 3.2s cubic-bezier(.4,0,.9,1) forwards;
   pointer-events: none;
   transform: translateX(-50%);
@@ -81,21 +53,21 @@ body {
 .danmaku.endword.invalid {
   color: #ff2222;
   text-shadow: 0 2px 18px #ff9a, 0 0 22px #fa5;
-  filter: blur(2.8px) brightness(2.05);
-  animation: danmaku-explode 1.4s cubic-bezier(.6,-0.5,.75,2.2) forwards;
+  filter: blur(1.5px) brightness(1.33);
+  animation: danmaku-explode 1.3s cubic-bezier(.6,-0.5,.75,2.2) forwards;
 }
 @keyframes danmaku-up {
   0%   { opacity:0; transform: translate(-50%, 0px) scale(0.95);}
-  10%  { opacity:1; filter: blur(3.5px);}
-  60%  { opacity:0.97; filter: blur(1.7px);}
-  82%  { filter: blur(6.7px);}
-  100% { opacity:0; transform: translate(-50%, -230px) scale(1.25); filter: blur(14px);}
+  10%  { opacity:1; filter: blur(0.7px);}
+  60%  { opacity:0.97; filter: blur(0.3px);}
+  82%  { filter: blur(2px);}
+  100% { opacity:0; transform: translate(-50%, -230px) scale(1.2); filter: blur(3px);}
 }
 @keyframes danmaku-explode {
   0%   { opacity:1; transform: translate(-50%, 0) scale(1);}
-  30%  { filter: blur(7px) brightness(1.7);}
-  70%  { filter: blur(14px) brightness(4);}
-  100% { opacity:0; transform: translate(-50%, -88px) scale(2.1); filter: blur(32px);}
+  30%  { filter: blur(2.4px) brightness(1.2);}
+  70%  { filter: blur(8px) brightness(2);}
+  100% { opacity:0; transform: translate(-50%, -88px) scale(1.7); filter: blur(16px);}
 }
 @keyframes danmaku-move {
   0%   { opacity: 0; left: 100vw;}
