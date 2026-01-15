@@ -6,12 +6,18 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="mode-selector">
-    <button id="mode-chat" class="selected">일반채팅</button>
-    <button id="mode-endword">끝말잇기</button>
+  <div style="display:flex;align-items: flex-start;">
+    <div id="user-list" style="min-width:130px;max-width:180px;margin-top:30px;font-size:1em;color:#44e;line-height:1.45"></div>
+    <div style="flex:1;">
+      <div id="last-endword" style="text-align:center; font-size:2em; color:#1fa4ff; margin-top:22px; margin-bottom:12px;"></div>
+      <div id="mode-selector">
+        <button id="mode-chat" class="selected">일반채팅</button>
+        <button id="mode-endword">끝말잇기</button>
+      </div>
+      <div id="danmaku-container"></div>
+      <input id="word-input" autocomplete="off" maxlength="16" placeholder="채팅 또는 끝말잇기 단어 입력!">
+    </div>
   </div>
-  <div id="danmaku-container"></div>
-  <input id="word-input" autocomplete="off" maxlength="16" placeholder="채팅 또는 끝말잇기 단어 입력!">
   <script type="module" src="app.js"></script>
 </body>
 </html>
