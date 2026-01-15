@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getDatabase, ref, push, onChildAdded, set, onDisconnect, serverTimestamp, get, onChildRemoved, update, remove, query, limitToLast } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-// ---- 익명 닉네임 (매 입장마다 동물/색 랜덤) ----
+// ---- 익명 닉네임 (랜덤 동물+색, 매 입장시 새로 생성) ----
 const colorSet = [
   "#e57373", "#64b5f6", "#81c784", "#ffb74d", "#ba68c8",
   "#4db6ac", "#ffd54f", "#a1887f", "#90a4ae", "#f06292"
@@ -60,7 +60,6 @@ onDisconnect(myUserRef).remove();
 
 // ---- 끝말잇기 초기화 투표 ----
 let resetVoted = false, resetVotes = {}, resetVoting = false;
-
 const resetVotesRef = ref(db, 'danmaku_reset_votes');
 onChildAdded(resetVotesRef, countResetVotes);
 onChildRemoved(resetVotesRef, countResetVotes);
@@ -97,7 +96,6 @@ resetBtn.onclick = ()=>{
 };
 
 function resetEndwordHistory() {
-  // DB에서 히스토리/마지막단어/투표 모두 삭제
   remove(ref(db, 'danmaku_end')).then(()=>{
     endwordsArr = [];
     endwordListDiv.innerHTML = "";
@@ -136,10 +134,10 @@ function isValidWord(newWord, prevWord) {
   return getLastChar(prevWord) === newWord[0];
 }
 
-// ---- 입력 이벤트
+// ---- 입력: 제한 없이 전체(채팅/끝말잇기)
 input.addEventListener('keydown', function(e){
   if ((e.key === 'Enter' || e.keyCode === 13) && input.value.trim() !== '') {
-    let text = input.value.trim().replace(/\s/g,'').slice(0,16);
+    let text = input.value;  // 글자수 제한 없이 전송
     if(mode === "chat"){
       push(ref(db, 'danmakus'), {
         text: text, mode: mode, time: Date.now(), user: myUser.nick, color: myUser.color
@@ -156,7 +154,7 @@ input.addEventListener('keydown', function(e){
   }
 });
 
-// ---- 가로 채팅 Danmaku
+// ---- 채팅 Danmaku
 const msgRef = ref(db, 'danmakus');
 onChildAdded(
   query(msgRef, limitToLast(40)),
@@ -172,7 +170,6 @@ onChildAdded(
 
 function spawnChatDanmaku(text, color) {
   const span = document.createElement('span');
-  // 랜덤 폰트 크기
   const fontSize = (1.0 + Math.random() * 1.3).toFixed(2) + "em";
   span.textContent = text;
   span.style.fontSize = fontSize;
