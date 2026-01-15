@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getDatabase, ref, push, onChildAdded, limitToLast, query } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-// 1. Firebase 설정 (본인 정보로 변경!)
+// 🔴 반드시 본인 파이어베이스 정보로 변경!
 const firebaseConfig = {
   apiKey: "AIzaSyCzCSi6eJh09lL_7i09flP2EgFva1ycByE",
   authDomain: "mthdchatting.firebaseapp.com",
@@ -11,10 +11,11 @@ const firebaseConfig = {
   messagingSenderId: "542488770302",
   appId: "1:542488770302:web:77e8b4ebdc6bf298c157af"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 2. DOM 참조
+// DOM
 const input = document.getElementById('word-input');
 const container = document.getElementById('danmaku-container');
 const modeChatBtn = document.getElementById('mode-chat');
@@ -23,7 +24,7 @@ const modeEndWordBtn = document.getElementById('mode-endword');
 let mode = 'chat';
 let lastEndWord = null;
 
-// 3. 모드 전환 버튼
+// 모드 전환
 modeChatBtn.onclick = () => {
   mode = 'chat';
   modeChatBtn.classList.add('selected');
@@ -35,7 +36,7 @@ modeEndWordBtn.onclick = () => {
   modeChatBtn.classList.remove('selected');
 };
 
-// 4. 끝말잇기 검사 함수
+// 끝말잇기 룰
 function getLastChar(word) {
   let pure = word.replace(/[^가-힣]/g,"");
   if (pure.length === 0) return '';
@@ -46,7 +47,7 @@ function isValidWord(newWord, prevWord) {
   return getLastChar(prevWord) === newWord[0];
 }
 
-// 5. 입력 엔터 처리 (채팅/끝말잇기)
+// 입력
 input.addEventListener('keydown', function(e){
   if ((e.key === 'Enter' || e.keyCode === 13) && input.value.trim() !== '') {
     let text = input.value.replace(/\s/g,'').slice(0,16);
@@ -57,7 +58,7 @@ input.addEventListener('keydown', function(e){
   }
 });
 
-// 6. 실시간 표시
+// 실시간 수신
 const msgRef = ref(db, 'danmakus');
 onChildAdded(
   query(msgRef, limitToLast(40)),
@@ -71,22 +72,28 @@ onChildAdded(
   }
 );
 
-// 7. 채팅(가로)
+// TVple 스타일: 범위 랜덤(속도/위치)
 function spawnChatDanmaku(text) {
   const span = document.createElement('span');
   span.textContent = text;
   span.className = 'danmaku chat';
-  // y 위치: 20~80vh 랜덤
-  span.style.top = (20 + Math.random() * 60) + 'vh';
+  // y 위치: 10~88vh 완전랜덤
+  span.style.top = (10 + Math.random() * 78) + 'vh';
+  // 애니메이션 시간: 5.5~9초 랜덤
+  const animDuration = (5.5 + Math.random() * 3.5).toFixed(2); // 5.5~9초
+  span.style.animationDuration = animDuration + 's';
+
   container.appendChild(span);
-  setTimeout(() => { span.remove(); }, 3400);
+
+  // 지나간 후 삭제
+  setTimeout(() => { span.remove(); }, (parseFloat(animDuration) * 1000) + 500);
 }
 
-// 8. 끝말잇기(뭉게뭉게 위로)
+// 끝말잇기(뭉게뭉게, 위로 올라감)
 function spawnEndwordDanmaku(text) {
   const span = document.createElement('span');
   span.textContent = text;
-  // x 위치: 중앙 근처(40~60vw 랜덤)
+  // x 위치: 중앙 부근 랜덤(40~60vw)
   span.style.left = (40 + Math.random() * 20) + 'vw';
   span.style.top = '60vh';
 
