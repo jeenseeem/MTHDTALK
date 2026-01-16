@@ -1,34 +1,49 @@
 body {
   background: #181018;
-  margin: 0; overflow: hidden; height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  height: 100vh;
 }
+
+/* 모드 선택 버튼 */
 #mode-selector {
-  position: relative; left: 0; top: 12px; text-align: center;
-  z-index: 11; margin-bottom:18px;
+  position: relative;
+  left: 0;
+  top: 12px;
+  text-align: center;
+  z-index: 11;
+  margin-bottom: 18px;
 }
 #mode-selector button {
-  background: #222b; color: #fff; border: none; margin: 0 2px;
-  font-size: 1.11em; padding: 8px 17px; border-radius: 15px;
-  cursor: pointer; transition: background 0.2s;
+  background: #222b;
+  color: #fff;
+  border: none;
+  margin: 0 2px;
+  font-size: 1.11em;
+  padding: 8px 17px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
-#mode-selector button.selected { background: #3d8cff; color: #fff; font-weight:bold; }
+#mode-selector button.selected {
+  background: #3d8cff;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* 채팅 danmaku */
 #danmaku-container {
-  position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
-  pointer-events: none; z-index: 2;
-}
-#user-list {
-  position:fixed; left:10px; top:24px; font-size:1.05em;
-  padding:8px 6px 8px 0;
-}
-#word-input {
-  position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%);
-  padding: 16px; font-size: 1.35em; border-radius: 12px; width: 330px;
-  background: rgba(30,30,40,0.92); color: #fff;
-  border: none; z-index: 10;
-  box-shadow: 0 8px 24px #0007;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 2;
 }
 .danmaku.chat {
-  position: absolute; white-space: nowrap;
+  position: absolute;
+  white-space: nowrap;
   font-weight: bold;
   text-shadow: 0 2px 6px #000a;
   filter: blur(0.05px) brightness(1.09);
@@ -36,7 +51,8 @@ body {
   animation-timing-function: cubic-bezier(.34,1,.52,1);
   animation-fill-mode: forwards;
   pointer-events: none;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
 }
 .danmaku.endword {
   position: absolute; left: 50%;
@@ -74,6 +90,18 @@ body {
   100% { opacity: 0; left: -50vw;}
 }
 
+/* 참여인원 리스트 */
+#user-list {
+  position:fixed;
+  left:10px;
+  top:24px;
+  font-size:1.05em;
+  padding:8px 6px 8px 0;
+  word-break: break-all;
+  max-width:180px;
+}
+
+/* 끝말잇기 단어 히스토리 박스 */
 #endword-list-panel {
   position: fixed;
   right: 10px;
@@ -111,4 +139,77 @@ body {
   padding-left: 4px;
   padding-right: 4px;
   border-radius: 4px;
+}
+
+/* 입력창 */
+#word-input {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  padding: 16px;
+  font-size: 1.35em;
+  border-radius: 12px;
+  width: 330px;
+  background: rgba(30,30,40,0.92);
+  color: #fff;
+  border: none;
+  z-index: 10;
+  box-shadow: 0 8px 24px #0007;
+}
+
+/* 팝업 중앙 투표 모달 */
+#reset-vote-modal {
+  display: none; /* JS에서 토글 - block/none */
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  background: rgba(0,0,0,0.28);
+}
+#reset-vote-modal .modal-inner,
+#reset-vote-modal > div  {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  background: #222a;
+  padding: 32px 32px 26px 32px;
+  border-radius: 18px;
+  box-shadow: 0 8px 40px #000b;
+  min-width: 260px;
+  text-align: center;
+  animation: popupfadein .3s;
+}
+@keyframes popupfadein {
+  from { opacity: 0; transform: translate(-50%,-54%) scale(.97);}
+  to   { opacity: 1; transform: translate(-50%,-50%) scale(1);}
+}
+#reset-vote-modal #reset-vote-question {
+  font-size: 1.18em;
+  color: #ffc;
+}
+#reset-vote-modal button {
+  margin: 0 16px;
+  padding: 9px 32px;
+  font-size: 1.1em;
+  border-radius: 7px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.19s;
+}
+#vote-yes { background: #32bdea; }
+#vote-yes:active, #vote-yes:focus { background: #2598b4;}
+#vote-no  { background: #e5595a; }
+#vote-no:active, #vote-no:focus  { background: #b93033;}
+#reset-vote-progress {
+  margin-top: 15px;
+  font-size: 0.97em;
+  color: #f8e8ff;
+  min-height: 22px;
+  transition: color .2s;
 }
